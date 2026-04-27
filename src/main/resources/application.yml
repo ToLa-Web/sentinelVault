@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: sentinelvault
+
+  # ── JPA ────────────────────────────────────────────────────────────
+  jpa:
+    hibernate:
+      ddl-auto: validate          # Flyway owns the schema; Hibernate only validates
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: public
+
+  # ── Flyway ─────────────────────────────────────────────────────────
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+
+  # ── Redis ──────────────────────────────────────────────────────────
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+# ── JWT ──────────────────────────────────────────────────────────────
+jwt:
+  secret: ${JWT_SECRET}           # 256-bit base64 secret — never hardcode
+  expiration-ms: 3600000          # 1 hour
+
+# ── Encryption ───────────────────────────────────────────────────────
+vault:
+  encryption:
+    key: ${VAULT_ENCRYPTION_KEY}  # AES-256 key — never hardcode
+
+# ── Logging ──────────────────────────────────────────────────────────
+logging:
+  level:
+    com.sentinelvault: INFO
+    org.springframework.security: WARN

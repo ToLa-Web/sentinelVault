@@ -1,0 +1,19 @@
+﻿spring:
+  datasource:
+    # Testcontainers will override url/username/password at runtime
+    driver-class-name: org.postgresql.Driver
+
+  flyway:
+    enabled: true
+
+jwt:
+  secret: test-secret-for-ci-only-do-not-use-in-prod-256bits=
+  expiration-ms: 3600000
+
+vault:
+  encryption:
+    key: test-aes-key-for-ci-only=
+
+logging:
+  level:
+    com.sentinelvault: DEBUG
