@@ -1,4 +1,4 @@
-﻿package com.tola.sentinelvault.identity.domain.repository;
+package com.tola.sentinelvault.identity.domain.repository;
 
 import com.tola.sentinelvault.identity.domain.model.Email;
 import com.tola.sentinelvault.identity.domain.model.User;

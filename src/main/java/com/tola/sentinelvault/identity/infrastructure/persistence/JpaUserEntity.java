@@ -1,4 +1,4 @@
-﻿package com.tola.sentinelvault.identity.infrastructure.persistence;
+package com.tola.sentinelvault.identity.infrastructure.persistence;
 
 import com.tola.sentinelvault.identity.domain.model.Role;
 import jakarta.persistence.*;

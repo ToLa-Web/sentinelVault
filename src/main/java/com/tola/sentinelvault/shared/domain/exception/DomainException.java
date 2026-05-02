@@ -1,4 +1,4 @@
-﻿package com.tola.sentinelvault.shared.domain.exception;
+package com.tola.sentinelvault.shared.domain.exception;
 /**
  * Base exception for all domain rule violations.
  *

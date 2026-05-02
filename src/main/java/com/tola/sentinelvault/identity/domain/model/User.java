@@ -1,4 +1,4 @@
-﻿package com.tola.sentinelvault.identity.domain.model;
+package com.tola.sentinelvault.identity.domain.model;
 
 import com.tola.sentinelvault.shared.domain.base.AggregateRoot;
 
@@ -37,7 +37,7 @@ public class User extends AggregateRoot {
         return user;
     }
 
-    public static User reconstruct(UUID id, Email email, String passwordHash, Role role, boolean enabled, Instant createdAt, Instant updatedAt) {
+    public static User reconstitute(UUID id, Email email, String passwordHash, Role role, boolean enabled, Instant createdAt, Instant updatedAt) {
         return new User(id, email, passwordHash, role, enabled, createdAt, updatedAt);
     }
 

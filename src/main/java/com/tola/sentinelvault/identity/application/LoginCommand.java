@@ -1,4 +1,4 @@
-﻿package com.tola.sentinelvault.identity.application;
+package com.tola.sentinelvault.identity.application;
 /**
  * Command carrying credentials for a login attempt.
  */

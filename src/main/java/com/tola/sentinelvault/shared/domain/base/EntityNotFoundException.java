@@ -1,4 +1,4 @@
-﻿package com.tola.sentinelvault.shared.domain.base;
+package com.tola.sentinelvault.shared.domain.base;
 
 import com.tola.sentinelvault.shared.domain.exception.DomainException;
 

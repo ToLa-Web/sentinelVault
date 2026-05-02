@@ -1,4 +1,4 @@
-﻿package com.tola.sentinelvault.identity.domain.model;
+package com.tola.sentinelvault.identity.domain.model;
 
 import com.tola.sentinelvault.shared.domain.base.ValueObject;
 

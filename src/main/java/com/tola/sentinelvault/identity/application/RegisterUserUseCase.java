@@ -1,4 +1,4 @@
-﻿package com.tola.sentinelvault.identity.application;
+package com.tola.sentinelvault.identity.application;
 
 import com.tola.sentinelvault.identity.application.dto.RegisterResponse;
 import com.tola.sentinelvault.identity.domain.model.Email;

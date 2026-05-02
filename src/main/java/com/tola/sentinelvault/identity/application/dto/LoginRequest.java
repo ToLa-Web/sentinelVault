@@ -1,4 +1,4 @@
-﻿package com.tola.sentinelvault.identity.application.dto;
+package com.tola.sentinelvault.identity.application.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

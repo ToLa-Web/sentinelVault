@@ -1,4 +1,4 @@
-﻿spring:
+spring:
   datasource:
     # Testcontainers will override url/username/password at runtime
     driver-class-name: org.postgresql.Driver

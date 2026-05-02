@@ -1,4 +1,4 @@
-﻿package com.tola.sentinelvault.shared.domain.base;
+package com.tola.sentinelvault.shared.domain.base;
 
 /**
  * Marker interface for all Value Objects in the domain.

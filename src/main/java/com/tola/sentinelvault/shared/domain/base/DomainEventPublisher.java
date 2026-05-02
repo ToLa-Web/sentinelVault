@@ -1,4 +1,4 @@
-﻿package com.tola.sentinelvault.shared.domain.base;
+package com.tola.sentinelvault.shared.domain.base;
 
 import java.util.List;
 

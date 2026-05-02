@@ -1,4 +1,4 @@
-﻿package com.tola.sentinelvault.identity.application.dto;
+package com.tola.sentinelvault.identity.application.dto;
 
 import com.tola.sentinelvault.identity.domain.model.Role;
 

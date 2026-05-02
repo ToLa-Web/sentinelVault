@@ -1,4 +1,4 @@
-﻿package com.tola.sentinelvault.identity.application.dto;
+package com.tola.sentinelvault.identity.application.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -11,9 +11,9 @@ public record RegisterRequest(
 
         @NotBlank(message = "Password is required")
         @Size(min = 8, message = "Password must be at least 8 characters")
-        String password
+        String password,
 
         /* Defaults to MEMBER if omitted — set in controller. */
-        //String role
+        String role
 ) {
 }

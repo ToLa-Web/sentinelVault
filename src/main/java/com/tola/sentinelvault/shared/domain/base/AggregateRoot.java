@@ -1,4 +1,4 @@
-﻿package com.tola.sentinelvault.shared.domain.base;
+package com.tola.sentinelvault.shared.domain.base;
 
 import lombok.Getter;
 import java.util.*;
@@ -27,12 +27,15 @@ import java.util.*;
  *   eventPublisher.publishAll(secret.pullEvents());
  */
 public abstract class AggregateRoot {
-    @Getter
     private final UUID id;
     private final List<DomainEvent> domainEvents  = new ArrayList<>();
 
     public AggregateRoot(UUID id) {
         this.id = id;
+    }
+
+    public UUID getId() {
+        return id;
     }
     /*
      * Registers a domain event to be published after persistence.

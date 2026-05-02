@@ -2,10 +2,17 @@ spring:
   application:
     name: sentinelvault
 
+  # ── DataSource ──────────────────────────────────────────────────────
+  datasource:
+    url: ${DB_URL:jdbc:h2:mem:sentinelvault;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+    driver-class-name: ${DB_DRIVER:org.h2.Driver}
+
   # ── JPA ────────────────────────────────────────────────────────────
   jpa:
     hibernate:
-      ddl-auto: validate          # Flyway owns the schema; Hibernate only validates
+      ddl-auto: create-drop          # Auto-create schema for H2 development
     show-sql: false
     properties:
       hibernate:
@@ -14,7 +21,7 @@ spring:
 
   # ── Flyway ─────────────────────────────────────────────────────────
   flyway:
-    enabled: true
+    enabled: false
     locations: classpath:db/migration
     baseline-on-migrate: false
 
@@ -26,16 +33,19 @@ spring:
 
 # ── JWT ──────────────────────────────────────────────────────────────
 jwt:
-  secret: ${JWT_SECRET}           # 256-bit base64 secret — never hardcode
+  secret: ${JWT_SECRET:default-secret-change-me-in-production-must-be-256-bits==}           # 256-bit base64 secret — never hardcode
   expiration-ms: 3600000          # 1 hour
 
 # ── Encryption ───────────────────────────────────────────────────────
 vault:
   encryption:
-    key: ${VAULT_ENCRYPTION_KEY}  # AES-256 key — never hardcode
+    key: ${VAULT_ENCRYPTION_KEY:default-aes-key-change-me-32b==}  # AES-256 key — never hardcode
 
-# ── Logging ──────────────────────────────────────────────────────────
+# ── Logging ──────────────────────────────────────────────────────
 logging:
   level:
-    com.sentinelvault: INFO
-    org.springframework.security: WARN
+    com.tola.sentinelvault: INFO
+    com.tola.sentinelvault.identity: INFO
+    com.tola.sentinelvault.identity.infrastructure.security: INFO
+    org.springframework.security: INFO
+    org.springframework.security.web.access: DEBUG

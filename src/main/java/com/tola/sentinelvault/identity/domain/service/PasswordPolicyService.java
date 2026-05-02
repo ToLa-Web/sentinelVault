@@ -1,4 +1,4 @@
-﻿package com.tola.sentinelvault.identity.domain.service;
+package com.tola.sentinelvault.identity.domain.service;
 
 import com.tola.sentinelvault.shared.domain.exception.DomainException;
 import org.springframework.stereotype.Service;

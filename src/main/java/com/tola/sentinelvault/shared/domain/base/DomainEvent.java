@@ -1,4 +1,4 @@
-﻿package com.tola.sentinelvault.shared.domain.base;
+package com.tola.sentinelvault.shared.domain.base;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -19,5 +19,5 @@ import java.util.UUID;
  */
 public interface DomainEvent {
     UUID eventId();
-    Instant OccurredOn();
+    Instant occurredOn();
 }

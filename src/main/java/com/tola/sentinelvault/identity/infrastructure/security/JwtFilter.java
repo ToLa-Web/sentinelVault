@@ -1,4 +1,4 @@
-﻿package com.tola.sentinelvault.identity.infrastructure.security;
+package com.tola.sentinelvault.identity.infrastructure.security;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -40,6 +40,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
 
         if (header == null || !header.startsWith(BEARER_PREFIX)) {
+            log.debug("No Authorization header or invalid Bearer format for request: {}", request.getRequestURI());
             chain.doFilter(request, response);
             return;
         }
@@ -47,20 +48,36 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = header.substring(BEARER_PREFIX.length());
 
         if (!jwtProvider.isValid(token)) {
+            log.debug("Invalid JWT token for request: {}", request.getRequestURI());
             chain.doFilter(request, response);
             return;
         }
 
-        Claims claims = jwtProvider.parse(token);
-        String role   = claims.get("role", String.class);
+        try {
+            Claims claims = jwtProvider.parse(token);
+            String userId = claims.getSubject();
+            String role = claims.get("role", String.class);
+            String email = claims.get("email", String.class);
 
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                claims.getSubject(),
-                null,
-                List.of(new SimpleGrantedAuthority("ROLE_" + role))
-        );
+            if (role == null || role.isEmpty()) {
+                log.warn("JWT token missing 'role' claim for user: {} ({})", userId, email);
+                chain.doFilter(request, response);
+                return;
+            }
 
-        SecurityContextHolder.getContext().setAuthentication(auth);
+            log.debug("Authenticated user {} with role {} for request: {}", userId, role, request.getRequestURI());
+
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                    userId,
+                    null,
+                    List.of(new SimpleGrantedAuthority("ROLE_" + role))
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(auth);
+        } catch (Exception ex) {
+            log.error("Error processing JWT token: {}", ex.getMessage(), ex);
+        }
+
         chain.doFilter(request, response);
     }
 }
