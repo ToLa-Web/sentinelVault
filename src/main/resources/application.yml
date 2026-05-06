@@ -33,13 +33,13 @@ spring:
 
 # ── JWT ──────────────────────────────────────────────────────────────
 jwt:
-  secret: ${JWT_SECRET:default-secret-change-me-in-production-must-be-256-bits==}           # 256-bit base64 secret — never hardcode
+  secret: ${JWT_SECRET:5eXspuluVQ+V2VznQ3xM/3cw7KFy2jk8tl0mPZTzF/g=}           # 256-bit base64 secret — never hardcode
   expiration-ms: 3600000          # 1 hour
 
 # ── Encryption ───────────────────────────────────────────────────────
 vault:
   encryption:
-    key: ${VAULT_ENCRYPTION_KEY:default-aes-key-change-me-32b==}  # AES-256 key — never hardcode
+    key: ${VAULT_ENCRYPTION_KEY:5eXspuluVQ+V2VznQ3xM/3cw7KFy2jk8tl0mPZTzF/g=}  # AES-256 key — never hardcode
 
 # ── Logging ──────────────────────────────────────────────────────
 logging:
