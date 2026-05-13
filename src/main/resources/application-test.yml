@@ -1,0 +1,35 @@
+﻿spring:
+  datasource:
+    url: jdbc:h2:mem:test;MODE=PostgreSQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  # ── Disable Redis autoconfiguration in tests ───
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
+jwt:
+  secret: test-secret-key-must-be-256-bits========
+  expiration-ms: 3600000
+
+vault:
+  encryption:
+    key: dGVzdC1hZXMta2V5LWNoYW5nZS1tZS0zMmI9PQ==
+
+logging:
+  level:
+    com.tola.sentinelvault: DEBUG
+

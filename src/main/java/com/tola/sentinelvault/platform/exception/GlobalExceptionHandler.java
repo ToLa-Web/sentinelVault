@@ -1,7 +1,7 @@
 package com.tola.sentinelvault.platform.exception;
 
-import com.tola.sentinelvault.identity.application.LoginUseCase;
-import com.tola.sentinelvault.identity.application.RegisterUserUseCase;
+import com.tola.sentinelvault.identity.application.usecase.LoginUseCase;
+import com.tola.sentinelvault.identity.application.usecase.RegisterUserUseCase;
 import com.tola.sentinelvault.identity.domain.model.InvalidEmailException;
 import com.tola.sentinelvault.identity.domain.service.PasswordPolicyService;
 import com.tola.sentinelvault.shared.domain.base.EntityNotFoundException;

@@ -16,6 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Intercepts every request, extracts the Bearer token from the
@@ -55,9 +56,16 @@ public class JwtFilter extends OncePerRequestFilter {
 
         try {
             Claims claims = jwtProvider.parse(token);
-            String userId = claims.getSubject();
+            UUID userId = UUID.fromString(claims.getSubject());
             String role = claims.get("role", String.class);
             String email = claims.get("email", String.class);
+
+            CustomUserPrincipal principal = new CustomUserPrincipal(
+                    userId,
+                    email,
+                    "", // Password is not needed for a validated JWT
+                    List.of(new SimpleGrantedAuthority("ROLE_" + role))
+            );
 
             if (role == null || role.isEmpty()) {
                 log.warn("JWT token missing 'role' claim for user: {} ({})", userId, email);
@@ -68,9 +76,9 @@ public class JwtFilter extends OncePerRequestFilter {
             log.debug("Authenticated user {} with role {} for request: {}", userId, role, request.getRequestURI());
 
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                    userId,
+                    principal,
                     null,
-                    List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                    principal.getAuthorities()
             );
 
             SecurityContextHolder.getContext().setAuthentication(auth);

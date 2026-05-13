@@ -38,6 +38,7 @@ public class UserRepositoryAdapter implements UserRepository {
     public boolean existsByEmail(Email email) {
         return springDataUserRepository.existsByEmail(email.value());
     }
+
     private User mapToDomain(JpaUserEntity entity) {
         return User.reconstitute(
                 entity.getId(),

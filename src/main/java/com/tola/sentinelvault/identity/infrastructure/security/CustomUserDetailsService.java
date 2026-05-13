@@ -3,7 +3,6 @@ package com.tola.sentinelvault.identity.infrastructure.security;
 import com.tola.sentinelvault.identity.domain.model.Email;
 import com.tola.sentinelvault.identity.domain.model.User;
 import com.tola.sentinelvault.identity.domain.repository.UserRepository;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
@@ -27,11 +26,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(Email.of(email))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getId().toString(),
+        return new CustomUserPrincipal(
+                user.getId(),
+                user.getEmail().value(),
                 user.getPasswordHash(),
-                user.isEnabled(),
-                true, true, true,
                 List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
         );
     }

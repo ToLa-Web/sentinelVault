@@ -1,14 +1,13 @@
 package com.tola.sentinelvault.identity.infrastructure.web;
 
-import com.tola.sentinelvault.identity.application.LoginCommand;
-import com.tola.sentinelvault.identity.application.LoginUseCase;
-import com.tola.sentinelvault.identity.application.RegisterUserCommand;
-import com.tola.sentinelvault.identity.application.RegisterUserUseCase;
+import com.tola.sentinelvault.identity.application.command.LoginCommand;
+import com.tola.sentinelvault.identity.application.usecase.LoginUseCase;
+import com.tola.sentinelvault.identity.application.command.RegisterUserCommand;
+import com.tola.sentinelvault.identity.application.usecase.RegisterUserUseCase;
 import com.tola.sentinelvault.identity.application.dto.LoginRequest;
 import com.tola.sentinelvault.identity.application.dto.LoginResponse;
 import com.tola.sentinelvault.identity.application.dto.RegisterRequest;
 import com.tola.sentinelvault.identity.application.dto.RegisterResponse;
-import com.tola.sentinelvault.identity.domain.model.Role;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,9 +23,8 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
-        Role role = request.role() != null ? Role.valueOf(request.role().toUpperCase()) : Role.MEMBER;
-
-        RegisterUserCommand cmd = new RegisterUserCommand(request.email(),  request.password(), role);
+        //Role role = request.role() != null ? Role.valueOf(request.role().toUpperCase()) : Role.MEMBER;
+        RegisterUserCommand cmd = new RegisterUserCommand(request.email(), request.password());
         RegisterResponse response = registerUserUseCase.execute(cmd);
         return ResponseEntity.ok(response);
     }

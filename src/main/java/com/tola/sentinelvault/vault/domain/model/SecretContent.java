@@ -14,7 +14,7 @@ public record SecretContent(String plainText) implements ValueObject {
         return new SecretContent(plainText);
     }
 
-     @Override
+    @Override
     public String toString() {
         return "SecretContent[REDACTED]";
      }

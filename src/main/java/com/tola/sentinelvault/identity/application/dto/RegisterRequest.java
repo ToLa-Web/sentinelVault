@@ -11,9 +11,6 @@ public record RegisterRequest(
 
         @NotBlank(message = "Password is required")
         @Size(min = 8, message = "Password must be at least 8 characters")
-        String password,
-
-        /* Defaults to MEMBER if omitted — set in controller. */
-        String role
+        String password
 ) {
 }

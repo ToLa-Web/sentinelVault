@@ -8,6 +8,11 @@ spring:
   jpa:
     show-sql: true
 
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
   # ── Disable Redis autoconfiguration locally (no Redis installed) ───
   autoconfigure:
     exclude:

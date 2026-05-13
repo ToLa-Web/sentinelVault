@@ -1,5 +1,6 @@
-package com.tola.sentinelvault.identity.application;
+package com.tola.sentinelvault.identity.application.usecase;
 
+import com.tola.sentinelvault.identity.application.command.LoginCommand;
 import com.tola.sentinelvault.identity.application.dto.LoginResponse;
 import com.tola.sentinelvault.identity.domain.model.Email;
 import com.tola.sentinelvault.identity.domain.model.User;

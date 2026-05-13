@@ -1,4 +1,4 @@
-﻿package com.tola.sentinelvault.identity.infrastructure.security;
+package com.tola.sentinelvault.identity.infrastructure.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

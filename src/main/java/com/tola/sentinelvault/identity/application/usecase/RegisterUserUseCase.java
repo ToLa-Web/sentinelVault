@@ -1,7 +1,9 @@
-package com.tola.sentinelvault.identity.application;
+package com.tola.sentinelvault.identity.application.usecase;
 
+import com.tola.sentinelvault.identity.application.command.RegisterUserCommand;
 import com.tola.sentinelvault.identity.application.dto.RegisterResponse;
 import com.tola.sentinelvault.identity.domain.model.Email;
+import com.tola.sentinelvault.identity.domain.model.Role;
 import com.tola.sentinelvault.identity.domain.model.User;
 import com.tola.sentinelvault.identity.domain.repository.UserRepository;
 import com.tola.sentinelvault.identity.domain.service.PasswordPolicyService;
@@ -32,8 +34,7 @@ public class RegisterUserUseCase {
         }
 
         String hash = passwordEncoder.encode(command.rawPassword());
-        User user = User.register(email, hash, command.role());
-
+        User user = User.register(email, hash, Role.MEMBER);
         userRepository.save(user);
 
         eventPublisher.publishAll(user.pullEvents());

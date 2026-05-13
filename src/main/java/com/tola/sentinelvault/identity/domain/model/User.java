@@ -46,15 +46,23 @@ public class User extends AggregateRoot {
         this.updatedAt = Instant.now();
     }
 
-    public void changeRole(Role newRole) {
+    public void changeRole(Role newRole, UUID updatedBy) {
+        Role oldRole = this.role;
         this.role = newRole;
         this.updatedAt = Instant.now();
+        this.registerEvent(new UserRoleChangedEvent(
+                UUID.randomUUID(),
+                updatedAt,
+                oldRole,
+                newRole,
+                updatedBy
+        ));
     }
 
-    public Email    getEmail()        { return email; }
-    public String   getPasswordHash() { return passwordHash; }
-    public Role     getRole()         { return role; }
-    public boolean  isEnabled()       { return enabled; }
-    public Instant  getCreatedAt()    { return createdAt; }
-    public Instant  getUpdatedAt()    { return updatedAt; }
+    public Email getEmail() { return email; }
+    public String getPasswordHash() { return passwordHash; }
+    public Role getRole() { return role; }
+    public boolean isEnabled() { return enabled; }
+    public Instant getCreatedAt() { return createdAt; }
+    public Instant getUpdatedAt() { return updatedAt; }
 }

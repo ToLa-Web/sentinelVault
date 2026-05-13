@@ -1,6 +1,5 @@
 package com.tola.sentinelvault.identity.config;
 
-import com.tola.sentinelvault.shared.domain.base.DomainEvent;
 import com.tola.sentinelvault.shared.domain.base.DomainEventPublisher;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
