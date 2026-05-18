@@ -1,16 +1,17 @@
 package com.tola.sentinelvault.platform.exception;
 
 import com.tola.sentinelvault.identity.application.usecase.LoginUseCase;
+import com.tola.sentinelvault.identity.application.usecase.RefreshAccessTokenUseCase;
 import com.tola.sentinelvault.identity.application.usecase.RegisterUserUseCase;
 import com.tola.sentinelvault.identity.domain.model.InvalidEmailException;
 import com.tola.sentinelvault.identity.domain.service.PasswordPolicyService;
+import com.tola.sentinelvault.platform.dto.ApiResponse;
 import com.tola.sentinelvault.shared.domain.base.EntityNotFoundException;
 import com.tola.sentinelvault.shared.domain.exception.DomainException;
 import com.tola.sentinelvault.vault.domain.service.SecretAccessPolicy;
 import com.tola.sentinelvault.vault.infrastructure.crypto.AesEncryptionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -23,7 +24,6 @@ import java.util.stream.Collectors;
 
 /**
  * Maps domain and infrastructure exceptions to HTTP responses.
- *
  * Order of handlers matters — more specific exceptions first.
  */
 @Slf4j
@@ -46,9 +46,9 @@ public class GlobalExceptionHandler {
                 ));
 
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("status",    400);
-        body.put("error",     "Validation failed");
-        body.put("fields",    fieldErrors);
+        body.put("success", false);
+        body.put("message", "Validation failed");
+        body.put("data", fieldErrors);
         body.put("timestamp", Instant.now().toString());
 
         return ResponseEntity.badRequest().body(body);
@@ -62,56 +62,64 @@ public class GlobalExceptionHandler {
             AesEncryptionService.EncryptionException.class,
             IllegalArgumentException.class
     })
-    public ResponseEntity<Map<String, Object>> handleBadRequest(Exception ex) {
-        return error(HttpStatus.BAD_REQUEST, ex.getMessage());
+    public <T> ResponseEntity<ApiResponse<T>> handleBadRequest(Exception ex) {
+        log.warn("Bad request: {}", ex.getMessage());
+        return ApiResponse.badRequest(ex.getMessage());
     }
 
     // ── 401 Unauthorized ─────────────────────────────────────────────
 
-    @ExceptionHandler(LoginUseCase.BadCredentialsException.class)
-    public ResponseEntity<Map<String, Object>> handleBadCredentials(DomainException ex) {
-        return error(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    @ExceptionHandler({
+            LoginUseCase.BadCredentialsException.class,
+            RefreshAccessTokenUseCase.InvalidRefreshTokenException.class,
+            RefreshAccessTokenUseCase.InvalidTokenTypeException.class
+    })
+    public <T> ResponseEntity<ApiResponse<T>> handleUnauthorized(DomainException ex) {
+        log.warn("Unauthorized: {}", ex.getMessage());
+        return ApiResponse.unauthorized(ex.getMessage());
     }
 
     // ── 403 Forbidden ────────────────────────────────────────────────
 
     @ExceptionHandler({
             LoginUseCase.AccountDisabledException.class,
+            RefreshAccessTokenUseCase.AccountDisabledException.class,
             SecretAccessPolicy.SecretAccessDeniedException.class
     })
-    public ResponseEntity<Map<String, Object>> handleForbidden(DomainException ex) {
-        return error(HttpStatus.FORBIDDEN, ex.getMessage());
+    public <T> ResponseEntity<ApiResponse<T>> handleForbidden(DomainException ex) {
+        log.warn("Forbidden: {}", ex.getMessage());
+        return ApiResponse.forbidden(ex.getMessage());
     }
 
     // ── 404 Not Found ────────────────────────────────────────────────
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleNotFound(EntityNotFoundException ex) {
-        return error(HttpStatus.NOT_FOUND, ex.getMessage());
+    @ExceptionHandler({
+            EntityNotFoundException.class,
+            RefreshAccessTokenUseCase.RefreshTokenNotFoundException.class
+    })
+    public <T> ResponseEntity<ApiResponse<T>> handleNotFound(DomainException ex) {
+        log.warn("Not found: {}", ex.getMessage());
+        return ApiResponse.notFound(ex.getMessage());
     }
 
     // ── 409 Conflict ─────────────────────────────────────────────────
 
-    @ExceptionHandler(RegisterUserUseCase.EmailAlreadyRegisteredException.class)
-    public ResponseEntity<Map<String, Object>> handleConflict(DomainException ex) {
-        return error(HttpStatus.CONFLICT, ex.getMessage());
+    @ExceptionHandler({
+            RegisterUserUseCase.EmailAlreadyRegisteredException.class,
+            RefreshAccessTokenUseCase.TokenRevokedException.class,
+            RefreshAccessTokenUseCase.TokenAlreadyUsedException.class,
+            RefreshAccessTokenUseCase.TokenExpiredException.class
+    })
+    public <T> ResponseEntity<ApiResponse<T>> handleConflict(DomainException ex) {
+        log.warn("Conflict: {}", ex.getMessage());
+        return ApiResponse.conflict(ex.getMessage());
     }
 
     // ── 500 Fallback ─────────────────────────────────────────────────
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
+    public <T> ResponseEntity<ApiResponse<T>> handleGeneric(Exception ex) {
         log.error("Unhandled exception: {}", ex.getMessage(), ex);
-        return error(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
-    }
-
-    // ── Helper ───────────────────────────────────────────────────────
-
-    private ResponseEntity<Map<String, Object>> error(HttpStatus status, String message) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("status",    status.value());
-        body.put("error",     message);
-        body.put("timestamp", Instant.now().toString());
-        return ResponseEntity.status(status).body(body);
+        return ApiResponse.internalError("An unexpected error occurred");
     }
 }

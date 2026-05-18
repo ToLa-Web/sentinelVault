@@ -7,7 +7,9 @@ import java.util.UUID;
 
 public record LoginResponse(
         @JsonProperty("access_token")
-        String token,
+        String accessToken,
+        @JsonProperty("refresh_token")
+        String refreshToken,
         UUID userId,
         String email,
         Role role) {

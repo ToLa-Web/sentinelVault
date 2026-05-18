@@ -1,14 +1,14 @@
 spring:
   application:
     name: sentinelvault
-  # ── DataSource (PostgreSQL) ───────────────────────────────────────────
+  # DataSource (PostgreSQL)
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/sentinelvault}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
 
-  # ── JPA ────────────────────────────────────────────────────────────
+  # JPA
   jpa:
     hibernate:
       ddl-auto: update            # Use update for dev; prefer Flyway in prod
@@ -18,29 +18,30 @@ spring:
         format_sql: true
         default_schema: public
 
-  # ── Flyway ─────────────────────────────────────────────────────────
+  # Flyway
   flyway:
     enabled: false
     locations: classpath:db/migration
     baseline-on-migrate: false
 
-  # ── Redis ──────────────────────────────────────────────────────────
+  # Redis
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
 
-# ── JWT ──────────────────────────────────────────────────────────────
+# JWT
 jwt:
   secret: ${JWT_SECRET:5eXspuluVQ+V2VznQ3xM/3cw7KFy2jk8tl0mPZTzF/g=}           # 256-bit base64 secret — never hardcode
-  expiration-ms: 3600000          # 1 hour
+  expiration-ms: 3600000   # 1 hour
+  refresh-expiration-ms: 604800000  # Refresh token: 7 days
 
-# ── Encryption ───────────────────────────────────────────────────────
+# Encryption
 vault:
   encryption:
     key: ${VAULT_ENCRYPTION_KEY:5eXspuluVQ+V2VznQ3xM/3cw7KFy2jk8tl0mPZTzF/g=}  # AES-256 key — never hardcode
 
-# ── Logging ──────────────────────────────────────────────────────
+# Logging
 logging:
   level:
     com.tola.sentinelvault: INFO

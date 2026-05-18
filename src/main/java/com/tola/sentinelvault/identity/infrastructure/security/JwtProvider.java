@@ -17,27 +17,46 @@ import java.util.Date;
 public class JwtProvider {
 
     private final SecretKey key;
-    private final Long expirationMs;
+    private final Long accessTokenExpirationMs;
+    private final Long refreshTokenExpirationMs;
 
     public JwtProvider(
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiration-ms}") long expirationMs) {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-        this.expirationMs = expirationMs;
+            @Value("${jwt.expiration-ms}") long accessTokenExpirationMs,
+            @Value("${jwt.refresh-expiration-ms:604800000}") long refreshTokenExpirationMs
+    ) {
+            this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+            this.accessTokenExpirationMs = accessTokenExpirationMs;
+            this.refreshTokenExpirationMs = refreshTokenExpirationMs;
     }
 
     public String generate(User user) {
         Date now    = new Date();
-        Date expiry = new Date(now.getTime() + expirationMs);
+        Date expiry = new Date(now.getTime() + accessTokenExpirationMs);
 
         return Jwts.builder()
             .subject(user.getId().toString())
             .claim("email", user.getEmail().value())
             .claim("role",  user.getRole().name())
+            .claim("type", "access")
             .issuedAt(now)
             .expiration(expiry)
             .signWith(key)
             .compact();
+    }
+
+    public String generateRefreshToken(User user) {
+        Date now    = new Date();
+        Date expiry = new Date(now.getTime() + refreshTokenExpirationMs);
+
+        return Jwts.builder()
+                .subject(user.getId().toString())
+                .claim("email", user.getEmail().value())
+                .claim("type", "refresh")
+                .issuedAt(now)
+                .expiration(expiry)
+                .signWith(key)
+                .compact();
     }
 
     public Claims parse(String token) {
@@ -55,6 +74,16 @@ public class JwtProvider {
         } catch (JwtException | IllegalArgumentException ex) {
             log.debug("Invalid JWT: {}", ex.getMessage());
             return false;
+        }
+    }
+
+    public String getTokenType(String token) {
+        try {
+            Claims claims = parse(token);
+            return claims.get("type", String.class);
+        } catch (Exception ex) {
+            log.debug("Could not extract token type: {}", ex.getMessage());
+            return null;
         }
     }
 }

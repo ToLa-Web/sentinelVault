@@ -19,8 +19,9 @@ public class LoginUseCase {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final IssueRefreshTokenUseCase issueRefreshTokenUseCase;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public LoginResponse execute(LoginCommand Command) {
 
         Email email = Email.of(Command.email());
@@ -36,8 +37,9 @@ public class LoginUseCase {
             throw new BadCredentialsException();
         }
 
-        String token = jwtProvider.generate(user);
-        return new LoginResponse(token, user.getId(), user.getEmail().value(), user.getRole());
+        String accessToken = jwtProvider.generate(user);
+        String refreshToken = issueRefreshTokenUseCase.execute(user);
+        return new LoginResponse(accessToken, refreshToken, user.getId(), user.getEmail().value(), user.getRole());
     }
 
     public static class BadCredentialsException extends DomainException {
