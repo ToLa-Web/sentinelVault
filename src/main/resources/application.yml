@@ -35,6 +35,14 @@ jwt:
   secret: ${JWT_SECRET:5eXspuluVQ+V2VznQ3xM/3cw7KFy2jk8tl0mPZTzF/g=}           # 256-bit base64 secret — never hardcode
   expiration-ms: 3600000   # 1 hour
   refresh-expiration-ms: 604800000  # Refresh token: 7 days
+  refresh-cookie:
+    name: refresh_token
+    path: /api/auth
+    domain: ${JWT_REFRESH_COOKIE_DOMAIN:}
+    secure: ${JWT_REFRESH_COOKIE_SECURE:false}
+    http-only: true
+    same-site: Lax
+    max-age-seconds: 604800
 
 # Encryption
 vault:
