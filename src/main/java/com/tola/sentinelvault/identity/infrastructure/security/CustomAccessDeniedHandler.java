@@ -1,45 +1,33 @@
 package com.tola.sentinelvault.identity.infrastructure.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.MediaType;
+import org.jspecify.annotations.NonNull;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.time.Instant;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
- * Returns a JSON 403 body when an authenticated user lacks the required role.
- * Without this, Spring Security returns an empty 403 page.
+ * Delegates 403 Access Denied filter failures directly to the GlobalExceptionHandler.
+ * This completely ensures a single, unified JSON API format across SentinelVault.
  */
 @Component
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
-    private final ObjectMapper objectMapper = new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    private final HandlerExceptionResolver resolver;
+
+    public CustomAccessDeniedHandler(@Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
+        this.resolver = resolver;
+    }
 
     @Override
-    public void handle(HttpServletRequest request,
-                       HttpServletResponse response,
-                       AccessDeniedException accessDeniedException) throws IOException {
+    public void handle(@NonNull HttpServletRequest request,
+                       @NonNull HttpServletResponse response,
+                       @NonNull AccessDeniedException accessDeniedException) {
 
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("status",    403);
-        body.put("error",     "Access denied — insufficient permissions");
-        body.put("path",      request.getRequestURI());
-        body.put("timestamp", Instant.now().toString());
-
-        objectMapper.writeValue(response.getOutputStream(), body);
+        // Elevate the exception past the filter layers into GlobalExceptionHandler
+        resolver.resolveException(request, response, null, accessDeniedException);
     }
 }

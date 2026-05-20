@@ -1,41 +1,29 @@
 package com.tola.sentinelvault.identity.infrastructure.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.MediaType;
+import org.jspecify.annotations.NonNull;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.time.Instant;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-    private final ObjectMapper objectMapper = new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    private final HandlerExceptionResolver resolver;
+
+    public CustomAuthenticationEntryPoint(@Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
+        this.resolver = resolver;
+    }
 
     @Override
-    public void commence(HttpServletRequest request,
-                         HttpServletResponse response,
-                         AuthenticationException authException) throws IOException {
+    public void commence(@NonNull HttpServletRequest request,
+                         @NonNull HttpServletResponse response,
+                         @NonNull AuthenticationException authException) {
 
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("status",    401);
-        body.put("error",     "Unauthorized — valid JWT required");
-        body.put("path",      request.getRequestURI());
-        body.put("timestamp", Instant.now().toString());
-
-        objectMapper.writeValue(response.getOutputStream(), body);
+        // This instantly routes the exception out of the filter chain and into GlobalExceptionHandler
+        resolver.resolveException(request, response, null, authException);
     }
 }

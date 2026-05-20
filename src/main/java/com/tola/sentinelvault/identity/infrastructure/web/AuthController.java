@@ -65,6 +65,6 @@ public class AuthController {
         logoutUseCase.execute(currentUser.getId());
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshTokenCookieFactory.clearCookie().toString())
-                .body(ApiResponse.success(null, "Logout successful"));
+                .body(ApiResponse.success("Logout successful"));
     }
 }

@@ -13,12 +13,12 @@ import com.tola.sentinelvault.vault.infrastructure.crypto.AesEncryptionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import java.time.Instant;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -29,11 +29,22 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(AccessDeniedException.class)
+    public <T> ResponseEntity<ApiResponse<T>> handleSpringAccessDenied(AccessDeniedException ex) {
+        log.warn("Access denied filter violation: {}", ex.getMessage());
+        return ApiResponse.forbidden("Access denied — insufficient privileges or missing credentials");
+    }
 
-    // ── 400 Validation ───────────────────────────────────────────────
+    @ExceptionHandler(AuthenticationException.class)
+    public <T> ResponseEntity<ApiResponse<T>> handleSecurityFilterException(AuthenticationException ex) {
+        log.warn("Security filter blocked request: {}", ex.getMessage());
+        return ApiResponse.unauthorized("Unauthorized — valid JWT required");
+    }
+
+    // ── 400 Validation
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidation(
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(
             MethodArgumentNotValidException ex) {
 
         Map<String, String> fieldErrors = ex.getBindingResult()
@@ -45,16 +56,13 @@ public class GlobalExceptionHandler {
                         (a, b) -> a
                 ));
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("success", false);
-        body.put("message", "Validation failed");
-        body.put("data", fieldErrors);
-        body.put("timestamp", Instant.now().toString());
-
-        return ResponseEntity.badRequest().body(body);
+        // Leverage your uniform DTO structure directly
+        return ResponseEntity.badRequest().body(
+                ApiResponse.error("Validation failed", fieldErrors)
+        );
     }
 
-    // ── 400 Bad Request ──────────────────────────────────────────────
+    // ── 400 Bad Request
 
     @ExceptionHandler({
             InvalidEmailException.class,
@@ -67,7 +75,7 @@ public class GlobalExceptionHandler {
         return ApiResponse.badRequest(ex.getMessage());
     }
 
-    // ── 401 Unauthorized ─────────────────────────────────────────────
+    // ── 401 Unauthorized
 
     @ExceptionHandler({
             LoginUseCase.BadCredentialsException.class,
@@ -79,7 +87,7 @@ public class GlobalExceptionHandler {
         return ApiResponse.unauthorized(ex.getMessage());
     }
 
-    // ── 403 Forbidden ────────────────────────────────────────────────
+    // ── 403 Forbidden
 
     @ExceptionHandler({
             LoginUseCase.AccountDisabledException.class,
@@ -91,7 +99,7 @@ public class GlobalExceptionHandler {
         return ApiResponse.forbidden(ex.getMessage());
     }
 
-    // ── 404 Not Found ────────────────────────────────────────────────
+    // ── 404 Not Found
 
     @ExceptionHandler({
             EntityNotFoundException.class,
@@ -102,7 +110,7 @@ public class GlobalExceptionHandler {
         return ApiResponse.notFound(ex.getMessage());
     }
 
-    // ── 409 Conflict ─────────────────────────────────────────────────
+    // ── 409 Conflict
 
     @ExceptionHandler({
             RegisterUserUseCase.EmailAlreadyRegisteredException.class,
@@ -115,7 +123,7 @@ public class GlobalExceptionHandler {
         return ApiResponse.conflict(ex.getMessage());
     }
 
-    // ── 500 Fallback ─────────────────────────────────────────────────
+    // ── 500 Fallback
 
     @ExceptionHandler(Exception.class)
     public <T> ResponseEntity<ApiResponse<T>> handleGeneric(Exception ex) {

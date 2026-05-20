@@ -5,6 +5,7 @@ import com.tola.sentinelvault.identity.application.dto.UpdateUserRoleRequest;
 import com.tola.sentinelvault.identity.application.usecase.UpdateUserRoleUseCase;
 import com.tola.sentinelvault.identity.domain.model.Role;
 import com.tola.sentinelvault.identity.infrastructure.security.CustomUserPrincipal;
+import com.tola.sentinelvault.platform.dto.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,13 +24,13 @@ public class UserController {
 
     @PatchMapping("/{id}/role")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> updateUserRole(
+    public ResponseEntity<ApiResponse<Void>> updateUserRole(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateUserRoleRequest request,
             @AuthenticationPrincipal CustomUserPrincipal currentUser
             ) {
         UpdateUserRoleCommand cmd = new UpdateUserRoleCommand(id, Role.valueOf(request.role().toUpperCase()), currentUser.getId());
         updateUserRoleUseCase.execute(cmd);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body(ApiResponse.success("User role updated successfully"));
     }
 }
