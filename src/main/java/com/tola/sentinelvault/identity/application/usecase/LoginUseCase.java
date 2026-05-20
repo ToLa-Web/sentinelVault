@@ -3,6 +3,7 @@
     import com.tola.sentinelvault.identity.application.command.LoginCommand;
     import com.tola.sentinelvault.identity.application.dto.LoginResponse;
     import com.tola.sentinelvault.identity.domain.model.Email;
+    import com.tola.sentinelvault.identity.domain.model.InvalidEmailException;
     import com.tola.sentinelvault.identity.domain.model.User;
     import com.tola.sentinelvault.identity.domain.repository.UserRepository;
     import com.tola.sentinelvault.identity.infrastructure.security.JwtProvider;
@@ -26,7 +27,12 @@
         @Transactional
         public LoginResponse execute(LoginCommand command) {
 
-            Email email = Email.of(command.email());
+            Email email;
+            try {
+                email = Email.of(command.email());
+            } catch (InvalidEmailException e) {
+                throw new BadCredentialsException();
+            }
 
             User user = userRepository.findByEmail(email).orElse(null);
 
