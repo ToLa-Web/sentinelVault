@@ -27,27 +27,39 @@ public class RefreshTokenRepositoryAdapter implements RefreshTokenRepository {
     @Override
     public Optional<RefreshToken> findById(TokenId tokenId) {
         return springDataRefreshTokenRepository.findById(tokenId.value())
-                .map(this::toDomain);
+                .map(entity -> {
+                    User user = userRepositoryAdapter.findById(entity.getUserId())
+                            .orElseThrow(() -> new IllegalStateException("User not found: " + entity.getUserId()));
+                    return toDomain(entity, user);
+                });
     }
 
     @Override
     public Optional<RefreshToken> findByTokenValue(String tokenValue) {
         return springDataRefreshTokenRepository.findByTokenValue(tokenValue)
-                .map(this::toDomain);
+                .map(entity -> {
+                    User user = userRepositoryAdapter.findById(entity.getUserId())
+                            .orElseThrow(() -> new IllegalStateException("User not found: " + entity.getUserId()));
+                    return toDomain(entity, user);
+                });
     }
 
     public List<RefreshToken> findByUserId(UUID userId) {
+        User user = userRepositoryAdapter.findById(userId)
+                .orElseThrow(() -> new IllegalStateException("User not found: " + userId));
         return springDataRefreshTokenRepository.findByUserId(userId)
                 .stream()
-                .map(this::toDomain)
+                .map(entity -> toDomain(entity, user))
                 .toList();
     }
 
     @Override
     public List<RefreshToken> findValidByUserId(UUID userId) {
+        User user = userRepositoryAdapter.findById(userId)
+                .orElseThrow(() -> new IllegalStateException("User not found: " + userId));
         return springDataRefreshTokenRepository.findValidTokensByUserId(userId, Instant.now())
                 .stream()
-                .map(this::toDomain)
+                .map(entity -> toDomain(entity, user))
                 .toList();
     }
 
@@ -57,7 +69,7 @@ public class RefreshTokenRepositoryAdapter implements RefreshTokenRepository {
     }
 
     @Override
-    public boolean isValidToken(TokenValue tokenValue) {
+    public boolean isValidToken(String tokenValue) {
         return springDataRefreshTokenRepository.findValidToken(tokenValue).isPresent();
     }
 
@@ -81,16 +93,11 @@ public class RefreshTokenRepositoryAdapter implements RefreshTokenRepository {
                 .build();
     }
 
-    private RefreshToken toDomain(JpaRefreshTokenEntity entity) {
-        Optional<User> user = userRepositoryAdapter.findById(entity.getUserId());
-        if (user.isEmpty()) {
-            throw new IllegalStateException("User not found for refresh token: " + entity.getId());
-        }
-
+    private RefreshToken toDomain(JpaRefreshTokenEntity entity, User user) {
         return RefreshToken.reconstitute(
                 TokenId.of(entity.getId()),
                 new TokenValue(entity.getTokenValue()),
-                user.get(),
+                user,
                 TokenExpiry.of(entity.getExpiryDate()),
                 entity.isRevoked(),
                 entity.getRevokedAt(),

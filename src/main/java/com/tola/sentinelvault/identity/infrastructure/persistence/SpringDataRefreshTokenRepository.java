@@ -16,11 +16,11 @@ public interface SpringDataRefreshTokenRepository extends JpaRepository<JpaRefre
     Optional<JpaRefreshTokenEntity> findByTokenValue(String tokenValue);
     List<JpaRefreshTokenEntity>  findByUserId(UUID userId);
     @Query("SELECT rt FROM JpaRefreshTokenEntity rt WHERE rt.tokenValue = :tokenValue AND rt.revoked = false AND rt.expiryDate > CURRENT_TIMESTAMP")
-    Optional<JpaRefreshTokenEntity> findValidToken(@Param("tokenValue") TokenValue tokenValue);
+    Optional<JpaRefreshTokenEntity> findValidToken(@Param("tokenValue") String tokenValue);
     @Query("SELECT rt FROM JpaRefreshTokenEntity rt WHERE rt.userId = :userId AND rt.revoked = false AND rt.used = false AND rt.expiryDate > :now")
     List<JpaRefreshTokenEntity> findValidTokensByUserId(@Param("userId") UUID userId, @Param("now") Instant now);
     // Revoke all tokens for a user
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("UPDATE JpaRefreshTokenEntity rt SET rt.revoked = true, rt.revokedAt = :now, rt.updatedAt = :now WHERE rt.userId = :userId AND rt.revoked = false")
     void revokeAllByUserId(@Param("userId") UUID userId, @Param("now") Instant now);

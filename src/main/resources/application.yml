@@ -10,6 +10,7 @@ spring:
 
   # JPA
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: update            # Use update for dev; prefer Flyway in prod
     show-sql: false
@@ -30,6 +31,11 @@ spring:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
 
+# Rate Limiting
+rate-limit:
+ max-attempts: 5
+ window-seconds: 300   # 5-minute sliding window
+
 # JWT
 jwt:
   secret: ${JWT_SECRET:5eXspuluVQ+V2VznQ3xM/3cw7KFy2jk8tl0mPZTzF/g=}           # 256-bit base64 secret — never hardcode
@@ -37,7 +43,7 @@ jwt:
   refresh-expiration-ms: 604800000  # Refresh token: 7 days
   refresh-cookie:
     name: refresh_token
-    path: /api/auth
+    path: /api
     domain: ${JWT_REFRESH_COOKIE_DOMAIN:}
     secure: ${JWT_REFRESH_COOKIE_SECURE:false}
     http-only: true

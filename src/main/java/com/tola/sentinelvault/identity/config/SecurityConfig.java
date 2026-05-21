@@ -3,6 +3,7 @@ package com.tola.sentinelvault.identity.config;
 import com.tola.sentinelvault.identity.infrastructure.security.CustomAccessDeniedHandler;
 import com.tola.sentinelvault.identity.infrastructure.security.CustomAuthenticationEntryPoint;
 import com.tola.sentinelvault.identity.infrastructure.security.JwtFilter;
+import com.tola.sentinelvault.platform.ratelimit.RateLimitProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -35,7 +36,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 @EnableWebSecurity
 @RequiredArgsConstructor
-@EnableConfigurationProperties(RefreshTokenCookieProperties.class)
+@EnableConfigurationProperties({
+        RateLimitProperties.class,
+        RefreshTokenCookieProperties.class
+})
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
@@ -51,8 +55,8 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/logout").authenticated()
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/v1/auth/logout").authenticated()
+                        .requestMatchers("/api/v1/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception

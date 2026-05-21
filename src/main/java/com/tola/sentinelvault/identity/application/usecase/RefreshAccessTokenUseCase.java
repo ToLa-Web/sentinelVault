@@ -26,44 +26,40 @@ public class RefreshAccessTokenUseCase {
     @Transactional
     public RefreshTokenResponse execute(RefreshTokenCommand command) {
 
-        String refreshTokenValue = command.refreshToken();
-        // Validate the refresh token format
-        if (!jwtProvider.isValid(refreshTokenValue)) {
-            throw new InvalidRefreshTokenException();
-        }
-        String tokenType = jwtProvider.getTokenType(refreshTokenValue);
-        if (!"refresh".equals(tokenType)) {
-            throw new InvalidTokenTypeException();
-        }
-        // Find the refresh token in database and validate it
-        RefreshToken refreshToken = refreshTokenRepository.findByTokenValue(refreshTokenValue)
+        String tokenValue = command.refreshToken();
+
+        if (!jwtProvider.isValid(tokenValue)) throw new InvalidRefreshTokenException();
+        if (!"refresh".equals(jwtProvider.getTokenType(tokenValue))) throw new InvalidTokenTypeException();
+
+        RefreshToken refreshToken = refreshTokenRepository.findByTokenValue(tokenValue)
                 .orElseThrow(RefreshTokenNotFoundException::new);
 
-        // Check if token is valid (not revoked and not expired)
         if (!refreshToken.isValid()) {
-            // Determine the reason for invalidity
-            if (refreshToken.isRevoked()) {
-                throw new TokenRevokedException();
-            } else if (refreshToken.isUsed()) {
+            if (refreshToken.isRevoked()) throw new TokenRevokedException();
+            if (refreshToken.isUsed()) {
+                // Reuse of an invalidated token — kill entire user session family
+                refreshTokenRepository.revokeAllByUserId(refreshToken.getUserId().getId());
+                log.warn("Refresh token reuse detected, session family revoked for user: {}",
+                        refreshToken.getUserId().getId());
                 throw new TokenAlreadyUsedException();
-            } else {
-                throw new TokenExpiredException();
             }
+            throw new TokenExpiredException();
         }
 
-        User user = userRepository.findById(refreshToken.getUserId().getId())
-                .orElseThrow(UserNotFoundException::new);
+        User user = refreshToken.getUserId(); // already loaded — no second DB call needed
+        if (user == null) throw new UserNotFoundException();
+        if (!user.isEnabled()) throw new AccountDisabledException();
 
-        if (!user.isEnabled()) {
-            throw new AccountDisabledException();
-        }
         refreshToken.markAsUsed();
         refreshTokenRepository.save(refreshToken);
 
-        String newAccessToken = jwtProvider.generate(user);
+        String newAccessToken  = jwtProvider.generate(user);
+        String newRefreshToken = jwtProvider.generateRefreshToken(user);
 
-        log.info("Issued new access token for user: {}", user.getId());
-        return new RefreshTokenResponse(newAccessToken);
+        refreshTokenRepository.save(RefreshToken.issue(user, newRefreshToken));
+
+        log.info("Rotated refresh token for user: {}", user.getId());
+        return new RefreshTokenResponse(newAccessToken, newRefreshToken);
     }
 
     public static class InvalidRefreshTokenException extends DomainException {

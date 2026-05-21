@@ -6,12 +6,16 @@ import com.tola.sentinelvault.identity.application.usecase.RegisterUserUseCase;
 import com.tola.sentinelvault.identity.domain.model.InvalidEmailException;
 import com.tola.sentinelvault.identity.domain.service.PasswordPolicyService;
 import com.tola.sentinelvault.platform.dto.ApiResponse;
+import com.tola.sentinelvault.platform.ratelimit.RateLimitService;
 import com.tola.sentinelvault.shared.domain.base.EntityNotFoundException;
 import com.tola.sentinelvault.shared.domain.exception.DomainException;
 import com.tola.sentinelvault.vault.domain.service.SecretAccessPolicy;
 import com.tola.sentinelvault.vault.infrastructure.crypto.AesEncryptionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
@@ -19,6 +23,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.Instant;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -29,6 +35,21 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(RateLimitService.RateLimitExceededException.class)
+    public ResponseEntity<ProblemDetail> handleRateLimitExceeded(RateLimitService.RateLimitExceededException ex) {
+        ProblemDetail detail = ProblemDetail.forStatus(HttpStatus.TOO_MANY_REQUESTS);
+        detail.setTitle("Rate limit exceeded");
+        detail.setDetail(ex.getMessage());
+        detail.setProperty("retryAfterSeconds", ex.getRetryAfterSeconds());
+        detail.setProperty("timestamp", Instant.now().toString());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()));
+
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).headers(headers).body(detail);
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public <T> ResponseEntity<ApiResponse<T>> handleSpringAccessDenied(AccessDeniedException ex) {
         log.warn("Access denied filter violation: {}", ex.getMessage());

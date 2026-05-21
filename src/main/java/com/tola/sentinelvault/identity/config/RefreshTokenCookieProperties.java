@@ -10,7 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class RefreshTokenCookieProperties {
 
     private String name = "refresh_token";
-    private String path = "/api/auth";
+    private String path = "/api";
     private String domain;
     private boolean secure = false;
     private boolean httpOnly = true;

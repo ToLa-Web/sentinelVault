@@ -16,7 +16,7 @@ public interface RefreshTokenRepository {
     List<RefreshToken> findByUserId(UUID userId);
     List<RefreshToken> findValidByUserId(UUID userId);
     void deleteById(TokenId tokenId);
-    boolean isValidToken(TokenValue tokenValue);
+    boolean isValidToken(String tokenValue);
     void revokeAllByUserId(UUID userId);
 
 }
