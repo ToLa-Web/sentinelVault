@@ -59,7 +59,7 @@ public class RefreshAccessTokenUseCase {
         refreshTokenRepository.save(RefreshToken.issue(user, newRefreshToken));
 
         log.info("Rotated refresh token for user: {}", user.getId());
-        return new RefreshTokenResponse(newAccessToken, newRefreshToken);
+        return new RefreshTokenResponse(newAccessToken, newRefreshToken, user.getId());
     }
 
     public static class InvalidRefreshTokenException extends DomainException {

@@ -37,7 +37,7 @@ public class RegisterUserUseCase {
         User user = User.register(email, hash, Role.MEMBER);
         userRepository.save(user);
 
-        eventPublisher.publishAll(user.pullEvents());
+        eventPublisher.publishAll(user.pullEvents()); // TODO : send a welcome email
         return new RegisterResponse(user.getId(), user.getEmail().value());
     }
 

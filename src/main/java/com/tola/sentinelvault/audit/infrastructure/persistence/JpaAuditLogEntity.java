@@ -1,9 +1,7 @@
 package com.tola.sentinelvault.audit.infrastructure.persistence;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.tola.sentinelvault.audit.domain.model.AuditLog;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,6 +32,19 @@ public class JpaAuditLogEntity {
 
     @Column(name = "resource_id")
     private UUID resourceId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AuditLog.Outcome outcome;
+
+    @Column(name = "client_ip", length = 45)       // 45 = max IPv6 length
+    private String clientIp;
+
+    @Column(name = "user_agent", length = 200)
+    private String userAgent;
+
+    @Column(length = 500)
+    private String detail;
 
     @Column(name = "occurred_on", nullable = false)
     private Instant occurredOn;

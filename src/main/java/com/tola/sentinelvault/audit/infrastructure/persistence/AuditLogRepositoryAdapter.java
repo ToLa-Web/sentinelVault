@@ -39,18 +39,26 @@ public class AuditLogRepositoryAdapter implements AuditLogRepository {
                 .action(log.getAction())
                 .resourceType(log.getResourceType())
                 .resourceId(log.getResourceId())
+                .outcome(log.getOutcome())
+                .clientIp(log.getClientIp())
+                .userAgent(log.getUserAgent())
+                .detail(log.getDetail())
                 .occurredOn(log.getOccurredOn())
                 .build();
     }
 
-    private AuditLog toDomain(JpaAuditLogEntity e) {
+    private AuditLog toDomain(JpaAuditLogEntity entity) {
         return AuditLog.reconstitute(
-                e.getId(),
-                e.getActorId(),
-                e.getAction(),
-                e.getResourceType(),
-                e.getResourceId(),
-                e.getOccurredOn()
+                entity.getId(),
+                entity.getActorId(),
+                entity.getAction(),
+                entity.getResourceType(),
+                entity.getResourceId(),
+                entity.getOutcome(),
+                entity.getClientIp(),
+                entity.getUserAgent(),
+                entity.getDetail(),
+                entity.getOccurredOn()
         );
     }
 }

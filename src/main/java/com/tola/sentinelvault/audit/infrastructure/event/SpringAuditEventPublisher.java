@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 public class SpringAuditEventPublisher implements AuditEventPublisher {
 
     private final ApplicationEventPublisher springPublisher;
-
     @Override
     public void publish(DomainEvent event) {
         springPublisher.publishEvent(event);

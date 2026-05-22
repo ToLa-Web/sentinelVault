@@ -22,6 +22,10 @@ public class RecordAuditEventUseCase {
                 cmd.action(),
                 cmd.resourceType(),
                 cmd.resourceId(),
+                cmd.outcome(),
+                cmd.clientIp(),
+                cmd.userAgent(),
+                cmd.detail(),
                 cmd.occurredOn()
         );
 

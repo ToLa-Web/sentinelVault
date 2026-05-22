@@ -46,10 +46,7 @@ public class RateLimitService {
         this.incrementScript.setResultType(Long.class);
     }
 
-    // -----------------------------------------------------------------------
     // Public API
-    // -----------------------------------------------------------------------
-
     /**
      * Checks whether the caller has exceeded the configured rate limit.
      *
@@ -61,7 +58,7 @@ public class RateLimitService {
     public void checkRateLimit(String identifier, String action) {
         validateInputs(identifier, action);
 
-        String key      = buildKey(identifier, action);
+        String key = buildKey(identifier, action);
         long   attempts = executeIncrement(key);
 
         if (attempts > properties.getMaxAttempts()) {
@@ -100,10 +97,7 @@ public class RateLimitService {
         return Math.max(0, properties.getMaxAttempts() - used);
     }
 
-    // -----------------------------------------------------------------------
     // Internals
-    // -----------------------------------------------------------------------
-
     private long executeIncrement(String key) {
         Long result = redisTemplate.execute(
                 incrementScript,
@@ -160,10 +154,7 @@ public class RateLimitService {
         }
     }
 
-    // -----------------------------------------------------------------------
     // Exception
-    // -----------------------------------------------------------------------
-
     public static class RateLimitExceededException extends RuntimeException {
 
         private final long retryAfterSeconds;
