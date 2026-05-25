@@ -1,5 +1,6 @@
 package com.tola.sentinelvault.platform.exception;
 
+import com.tola.sentinelvault.identity.application.usecase.ChangePasswordUseCase;
 import com.tola.sentinelvault.identity.application.usecase.LoginUseCase;
 import com.tola.sentinelvault.identity.application.usecase.RefreshAccessTokenUseCase;
 import com.tola.sentinelvault.identity.application.usecase.RegisterUserUseCase;
@@ -89,7 +90,9 @@ public class GlobalExceptionHandler {
             InvalidEmailException.class,
             PasswordPolicyService.WeakPasswordException.class,
             AesEncryptionService.EncryptionException.class,
-            IllegalArgumentException.class
+            IllegalArgumentException.class,
+            ChangePasswordUseCase.CurrentPasswordMismatchException.class,
+            ChangePasswordUseCase.SamePasswordException.class,
     })
     public <T> ResponseEntity<ApiResponse<T>> handleBadRequest(Exception ex) {
         log.warn("Bad request: {}", ex.getMessage());
@@ -124,7 +127,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             EntityNotFoundException.class,
-            RefreshAccessTokenUseCase.RefreshTokenNotFoundException.class
+            RefreshAccessTokenUseCase.RefreshTokenNotFoundException.class,
+            ChangePasswordUseCase.UserNotFoundException.class,
     })
     public <T> ResponseEntity<ApiResponse<T>> handleNotFound(DomainException ex) {
         log.warn("Not found: {}", ex.getMessage());

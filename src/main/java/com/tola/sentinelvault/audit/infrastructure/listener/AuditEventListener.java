@@ -3,6 +3,7 @@ package com.tola.sentinelvault.audit.infrastructure.listener;
 import com.tola.sentinelvault.audit.application.command.RecordAuditEventCommand;
 import com.tola.sentinelvault.audit.application.mapper.AuditMapper;
 import com.tola.sentinelvault.audit.application.usecase.RecordAuditEventUseCase;
+import com.tola.sentinelvault.identity.domain.model.PasswordChangedEvent;
 import com.tola.sentinelvault.identity.domain.model.UserRegisteredEvent;
 import com.tola.sentinelvault.vault.domain.model.SecretCreatedEvent;
 import com.tola.sentinelvault.vault.domain.model.SecretUpdatedEvent;
@@ -24,6 +25,12 @@ public class AuditEventListener {
     @EventListener
     public void onAuthAuditEvent(RecordAuditEventCommand command) {
         record(command);
+    }
+
+    @Async
+    @EventListener
+    public void onPasswordChanged(PasswordChangedEvent event) {
+        record(auditMapper.fromPasswordChanged(event));
     }
 
     @Async

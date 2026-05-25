@@ -2,14 +2,18 @@ package com.tola.sentinelvault.identity.infrastructure.persistence;
 import com.tola.sentinelvault.identity.domain.model.Email;
 import com.tola.sentinelvault.identity.domain.model.User;
 import com.tola.sentinelvault.identity.domain.repository.UserRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import java.util.UUID;
+
 @Repository
 @RequiredArgsConstructor
 public class UserRepositoryAdapter implements UserRepository {
     private final SpringDataUserRepository springDataUserRepository;
+    private final EntityManager entityManager;
+
     @Override
     public User save(User user) {
         JpaUserEntity entity = new JpaUserEntity(
@@ -21,25 +25,31 @@ public class UserRepositoryAdapter implements UserRepository {
                 user.getCreatedAt(),
                 user.getUpdatedAt()
         );
-        springDataUserRepository.save(entity);
+
+        entityManager.merge(entity);
+        entityManager.flush();
+
         return user;
     }
+
     @Override
     public Optional<User> findById(UUID id) {
         return springDataUserRepository.findById(id)
-                .map(this::mapToDomain);
+                .map(this::toDomain);
     }
+
     @Override
     public Optional<User> findByEmail(Email email) {
         return springDataUserRepository.findByEmail(email.value())
-                .map(this::mapToDomain);
+                .map(this::toDomain);
     }
+
     @Override
     public boolean existsByEmail(Email email) {
         return springDataUserRepository.existsByEmail(email.value());
     }
 
-    private User mapToDomain(JpaUserEntity entity) {
+    private User toDomain(JpaUserEntity entity) {
         return User.reconstitute(
                 entity.getId(),
                 Email.of(entity.getEmail()),

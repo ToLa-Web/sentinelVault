@@ -12,6 +12,7 @@ public final class AuditActions {
     public static final String TOKEN_REFRESH_OK     = "identity.token.refresh.success";
     public static final String TOKEN_REFRESH_FAIL   = "identity.token.refresh.failure";
     public static final String ROLE_UPDATED         = "identity.role.updated";
+    public static final String PASSWORD_CHANGED = "identity.password.changed";
 
     public static final String VAULT_SECRET_CREATED = "vault.secret.created";
     public static final String VAULT_SECRET_UPDATED = "vault.secret.updated";

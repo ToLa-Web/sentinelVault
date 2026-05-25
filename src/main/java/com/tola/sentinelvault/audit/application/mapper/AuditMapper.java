@@ -3,6 +3,7 @@ package com.tola.sentinelvault.audit.application.mapper;
 import com.tola.sentinelvault.audit.application.command.RecordAuditEventCommand;
 import com.tola.sentinelvault.audit.domain.model.AuditActions;
 import com.tola.sentinelvault.audit.domain.model.AuditLog;
+import com.tola.sentinelvault.identity.domain.model.PasswordChangedEvent;
 import com.tola.sentinelvault.identity.domain.model.UserRegisteredEvent;
 import com.tola.sentinelvault.vault.domain.model.SecretCreatedEvent;
 import com.tola.sentinelvault.vault.domain.model.SecretUpdatedEvent;
@@ -12,6 +13,21 @@ import java.util.UUID;
 
 @Component
 public class AuditMapper {
+
+    public RecordAuditEventCommand fromPasswordChanged(PasswordChangedEvent event) {
+        return new RecordAuditEventCommand(
+                UUID.randomUUID(),
+                event.userId(),
+                AuditActions.PASSWORD_CHANGED,
+                "User",
+                event.userId(),
+                AuditLog.Outcome.SUCCESS,
+                null,
+                null,
+                "Password changed",
+                event.occurredOn()
+        );
+    }
     public RecordAuditEventCommand fromSecretCreated(SecretCreatedEvent event) {
         return new RecordAuditEventCommand(
                 UUID.randomUUID(),

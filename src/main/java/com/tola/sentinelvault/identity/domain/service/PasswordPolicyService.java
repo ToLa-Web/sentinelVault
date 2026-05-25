@@ -12,10 +12,10 @@ public class PasswordPolicyService {
         if (rawPassword == null || rawPassword.length() < MIN_LENGTH) {
             throw new WeakPasswordException("Password must be at least " + MIN_LENGTH + " characters long");
         }
-        if (!rawPassword.chars().anyMatch(Character::isUpperCase)) {
+        if (rawPassword.chars().noneMatch(Character::isUpperCase)) {
             throw new WeakPasswordException("Password must contain at least one uppercase letter");
         }
-        if (!rawPassword.chars().anyMatch(c -> "!@#$%^&*()-_=+[]{}|;:',.<>?/`~".indexOf(c) >= 0)) {
+        if (rawPassword.chars().noneMatch(c -> "!@#$%^&*()-_=+[]{}|;:',.<>?/`~".indexOf(c) >= 0)) {
             throw new WeakPasswordException(
                     "Password must contain at least one special character");
         }

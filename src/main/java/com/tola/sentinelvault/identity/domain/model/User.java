@@ -59,6 +59,22 @@ public class User extends AggregateRoot {
         ));
     }
 
+    public void changePassword(String newPasswordHash) {
+        if (newPasswordHash == null || newPasswordHash.isBlank()) {
+            throw new IllegalArgumentException("Password hash must not be blank");
+        }
+
+        String oldHash = this.passwordHash;
+        this.passwordHash = newPasswordHash;
+        this.updatedAt = Instant.now();
+        this.registerEvent(new PasswordChangedEvent(
+                UUID.randomUUID(),
+                updatedAt,
+                this.getId(),
+                oldHash
+        ));
+    }
+
     public Email getEmail() { return email; }
     public String getPasswordHash() { return passwordHash; }
     public Role getRole() { return role; }
